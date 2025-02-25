@@ -15,10 +15,10 @@ const handleTask = async (data) => {
     let browser = null;
 
     try {
-        exec(`google-chrome-stable --remote-debugging-port=${remoteDebuggingPort} --user-data-dir=${userDataDir} --profile-directory=Default --start-maximized`, (err, stdout, stderr) => {
+        exec(`google-chrome-stable --headless --remote-debugging-port=${remoteDebuggingPort} --user-data-dir=${userDataDir} --profile-directory=Default --start-maximized`, (err, stdout, stderr) => {
             if (err) {
-                console.error(`Error launching Chrome: ${err.message}`);
-                return;
+            console.error(`Error launching Chrome: ${err.message}`);
+            return;
             }
         });
 
@@ -41,23 +41,33 @@ const handleTask = async (data) => {
             const errorMessageSelector = 'div[data-animate-modal-body="true"]';
             const errorMessage = await page.$(errorMessageSelector);
             if (errorMessage) {
-                console.log('Invalid phone number:', data.phone);
+                console.log('Invalid phone number or whatsapp not register:', data.phone);
                 const errorButtonSelector = 'div[data-animate-modal-body="true"] button';
                 const errorButton = await page.$(errorButtonSelector);
                 if (errorButton) {
                     await errorButton.click();
                 }
+                await randomSleep(1000, 3000);
                 return;
             }
 
-            
-            
+            // const sendButtonSelector = 'span[data-icon="send"]';
+            // const sendButton = await page.$(sendButtonSelector);
+            // if (sendButton) {
+            //     await sendButton.click();
+            //     console.log('Message sent to:', data.phone);
+            // } else {
+            //     console.log('Send button not found for:', data.phone);
+            // }
+
+            await page.keyboard.press('Enter');
+            await randomSleep(5000, 8000);
 
         }).catch((error) => {
             console.error('Failed to connect to browser:', error);
         }).finally(async () => {
             if (browser) {
-                // await browser.close();
+                await browser.close();
             }
         });
     } catch (err) {
