@@ -13,6 +13,7 @@ const handleTask = async (data) => {
     const userDataDir = `/home/Farjan/.config/google-chrome/Default`;
     const remoteDebuggingPort = 9222;
     let browser = null;
+    let isWhatsappNumber = 2;
 
     try {
         exec(`google-chrome-stable --headless --remote-debugging-port=${remoteDebuggingPort} --user-data-dir=${userDataDir} --profile-directory=Default --start-maximized`, (err, stdout, stderr) => {
@@ -51,14 +52,7 @@ const handleTask = async (data) => {
                 return;
             }
 
-            // const sendButtonSelector = 'span[data-icon="send"]';
-            // const sendButton = await page.$(sendButtonSelector);
-            // if (sendButton) {
-            //     await sendButton.click();
-            //     console.log('Message sent to:', data.phone);
-            // } else {
-            //     console.log('Send button not found for:', data.phone);
-            // }
+            isWhatsappNumber = 1;
 
             await page.keyboard.press('Enter');
             await randomSleep(5000, 8000);
@@ -69,6 +63,13 @@ const handleTask = async (data) => {
             if (browser) {
                 await browser.close();
             }
+            await fetch(`https://api.farjan.dev/whatsapp.php?method=is_whatsapp&wa_status=${isWhatsappNumber}&id=${data.id}`, {
+                method: 'GET'
+            }).then(response => response.json()).then(result => {
+                console.log('API call result:', result);
+            }).catch(error => {
+                console.error('API call error:', error);
+            });
         });
     } catch (err) {
         console.log('try catch error: ' + err.message);
